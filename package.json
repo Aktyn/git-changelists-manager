@@ -1,0 +1,53 @@
+{
+  "name": "git-changelists-manager",
+  "displayName": "Git changelists manager",
+  "description": "Extension for grouping files into changelist. Changes in files inside changelist are ignored in git.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.77.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "git-changelists-manager.helloWorld",
+        "title": "Hello World"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "format": "prettier --write src/**/*.ts",
+    "lint": "eslint src --ext ts --fix",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.77.0",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "prettier": "^2.8.7",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.5",
+    "webpack": "^5.76.3",
+    "webpack-cli": "^5.0.1"
+  }
+}
