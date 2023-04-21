@@ -14,10 +14,40 @@
   "contributes": {
     "commands": [
       {
-        "command": "git-changelists-manager.helloWorld",
-        "title": "Hello World"
+        "command": "git-changelists-manager.views.explorer.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.createNew",
+        "title": "Add Changelist",
+        "icon": "$(add)"
       }
-    ]
+    ],
+    "commandPalette": [],
+    "views": {
+      "scm": [
+        {
+          "id": "git-changelists-manager.views.explorer",
+          "name": "Changelists",
+          "contextualTitle": "Git Changelists Manager"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "git-changelists-manager.views.explorer.createNew",
+          "when": "view == git-changelists-manager.views.explorer",
+          "group": "navigation"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.refresh",
+          "when": "view == git-changelists-manager.views.explorer",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
