@@ -7,22 +7,43 @@ import { ChangelistTreeDataProvider } from './changelistTreeDataProvider'
 
 export class GitChangelistsManager {
   private readonly changelistsTree: TreeView<ChangelistEntry>
-  private readonly treeDataProvider = new ChangelistTreeDataProvider()
-  private readonly api = new GitAPI()
+  protected readonly treeDataProvider
+  protected readonly git = new GitAPI()
 
   constructor(private readonly context: ExtensionContext) {
     this.context.subscriptions.push(
       commands.registerCommand(`${CONFIG.extensionId}.views.explorer.createNew`, () => {
-        this.createNew().catch((error) =>
+        this.createChangelist().catch((error) =>
           logger.appendLine(error instanceof Error ? error.message : String(error)),
         )
       }),
     )
     this.context.subscriptions.push(
       commands.registerCommand(`${CONFIG.extensionId}.views.explorer.refresh`, () => {
-        window.showInformationMessage('TODO')
+        this.treeDataProvider.refresh()
       }),
     )
+    this.context.subscriptions.push(
+      commands.registerCommand(
+        `${CONFIG.extensionId}.views.explorer.removeChangeList`,
+        (changelist: ChangelistEntry) => {
+          if (changelist.contextValue !== 'changelist') {
+            return
+          }
+          this.removeChangelist(changelist.label)
+        },
+      ),
+    )
+    this.context.subscriptions.push(
+      commands.registerCommand(
+        `${CONFIG.extensionId}.views.explorer.addFileToChangelist`,
+        (node?: { resourceUri: { fsPath: string } }) => {
+          logger.appendLine('addFileToChangelist invoked ' + node?.resourceUri?.fsPath) //TODO: remove
+        },
+      ),
+    )
+
+    this.treeDataProvider = new ChangelistTreeDataProvider(this.git.getData())
 
     this.changelistsTree = window.createTreeView(`${CONFIG.extensionId}.views.explorer`, {
       treeDataProvider: this.treeDataProvider,
@@ -32,7 +53,8 @@ export class GitChangelistsManager {
     context.subscriptions.push(this.changelistsTree)
   }
 
-  private async createNew() {
+  @withGitUpdate
+  private async createChangelist() {
     const newChangelistName = await window.showInputBox({
       placeHolder: 'Name',
       prompt: 'Enter unique changelist name',
@@ -44,12 +66,29 @@ export class GitChangelistsManager {
       return
     }
 
-    // if (Object.keys(ChangeListView.tree).includes(newChangelistName)) {
-    //   window.showErrorMessage(changelistNameAlreadyExists)
-    //   return
-    // }
+    const changelists = this.treeDataProvider.getChildren()
+    if (changelists.some((changelist) => changelist.label === newChangelistName)) {
+      window.showErrorMessage('Changelist with this name already exists!')
+      return
+    }
 
-    //viewInstance.addNewChangelist(newChangelistName)
     this.treeDataProvider.addChangelist(newChangelistName)
   }
+
+  @withGitUpdate
+  private removeChangelist(name: string) {
+    this.treeDataProvider.removeChangelist(name)
+  }
+}
+
+function withGitUpdate(_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor) {
+  const originalMethod: (...args: unknown[]) => unknown = descriptor.value
+
+  descriptor.value = async function (this: GitChangelistsManager, ...args: unknown[]) {
+    const returnValue = await originalMethod.apply(this, args)
+    this.git.update(this.treeDataProvider.getChildren())
+    return returnValue
+  }
+
+  return descriptor
 }

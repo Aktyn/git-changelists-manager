@@ -9,8 +9,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
   "main": "./dist/extension.js",
+  "activationEvents": [
+    "workspaceContains:**/.git/info/exclude"
+  ],
   "contributes": {
     "commands": [
       {
@@ -20,8 +22,23 @@
       },
       {
         "command": "git-changelists-manager.views.explorer.createNew",
-        "title": "Add Changelist",
+        "title": "Add changelist",
         "icon": "$(add)"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.rename",
+        "title": "Rename changelist",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.removeChangeList",
+        "title": "Delete changelist",
+        "icon": "$(terminal-kill)"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.addFileToChangelist",
+        "title": "Add to changelist",
+        "group": "inline"
       }
     ],
     "commandPalette": [],
@@ -45,6 +62,24 @@
           "command": "git-changelists-manager.views.explorer.refresh",
           "when": "view == git-changelists-manager.views.explorer",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "git-changelists-manager.views.explorer.rename",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
+          "group": "inline"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.removeChangeList",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
+          "group": "inline"
+        }
+      ],
+      "scm/resourceState/context": [
+        {
+          "command": "git-changelists-manager.views.explorer.addFileToChangelist",
+          "when": "scmProvider == git && scmResourceGroup == workingTree"
         }
       ]
     }
