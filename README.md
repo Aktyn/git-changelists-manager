@@ -12,4 +12,7 @@ Tested on linux only.
 
 ## Release Notes
 ### 1.0.0
-Initial release
+- Initial release
+
+### 1.0.1
+- Extension icon
