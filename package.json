@@ -4,7 +4,7 @@
   "publisher": "Aktyn",
   "icon": "res/logo_128x128.png",
   "description": "Extension for grouping files into changelist. Changes in files inside changelist are ignored in git.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Radosław Krajewski (Aktyn) <aktyn3@gmail.com>",
   "license": "GPL-3.0",
   "repository": {
