@@ -1,12 +1,15 @@
 {
   "name": "git-changelists-manager",
   "displayName": "Git changelists manager",
+  "publisher": "Aktyn",
+  "icon": "res/logo_128x128.png",
   "description": "Extension for grouping files into changelist. Changes in files inside changelist are ignored in git.",
   "version": "1.0.0",
   "author": "Radosław Krajewski (Aktyn) <aktyn3@gmail.com>",
+  "license": "GPL-3.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Aktyn/git-changelists-manager.git"
+    "url": "https://github.com/Aktyn/git-changelists-manager.git"
   },
   "bugs": {
     "url": "https://github.com/Aktyn/git-changelists-manager/issues"
