@@ -4,6 +4,14 @@
   "description": "Extension for grouping files into changelist. Changes in files inside changelist are ignored in git.",
   "version": "1.0.0",
   "author": "Radosław Krajewski (Aktyn) <aktyn3@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aktyn/git-changelists-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Aktyn/git-changelists-manager/issues"
+  },
+  "homepage": "https://github.com/Aktyn/git-changelists-manager#readme",
   "engines": {
     "vscode": "^1.77.0"
   },
