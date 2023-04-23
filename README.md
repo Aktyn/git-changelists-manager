@@ -6,8 +6,6 @@ This extension mainly uses the `git update-index --assume-unchanged <filepath` a
 
 It also allows the user to group files into changelists so that they can be restored all at once later.
 
-Tested on linux only.
-
 ![Preview](res/preview.png)
 
 ## Release Notes
