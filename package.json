@@ -2,7 +2,7 @@
   "name": "git-changelists-manager",
   "displayName": "Git changelists manager",
   "description": "Extension for grouping files into changelist. Changes in files inside changelist are ignored in git.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Radosław Krajewski (Aktyn) <aktyn3@gmail.com>",
   "engines": {
     "vscode": "^1.77.0"
