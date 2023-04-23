@@ -3,6 +3,7 @@
   "displayName": "Git changelists manager",
   "description": "Extension for grouping files into changelist. Changes in files inside changelist are ignored in git.",
   "version": "0.0.1",
+  "author": "Radosław Krajewski (Aktyn) <aktyn3@gmail.com>",
   "engines": {
     "vscode": "^1.77.0"
   },
@@ -39,6 +40,11 @@
         "command": "git-changelists-manager.views.explorer.addFileToChangelist",
         "title": "Add to changelist",
         "group": "inline"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.removeFile",
+        "title": "Remove file from changelist",
+        "icon": "$(terminal-kill)"
       }
     ],
     "commandPalette": [],
@@ -73,6 +79,11 @@
         {
           "command": "git-changelists-manager.views.explorer.removeChangeList",
           "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
+          "group": "inline"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.removeFile",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == filePath",
           "group": "inline"
         }
       ],

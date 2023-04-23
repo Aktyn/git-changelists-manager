@@ -1,22 +1,45 @@
+import type { Uri } from 'vscode'
 import { commands, window, type ExtensionContext, type TreeView } from 'vscode'
 import { CONFIG } from '../config'
 import { GitAPI } from '../gitAPI'
 import { logger } from '../logger'
-import type { ChangelistEntry } from './changelistEntry'
 import { ChangelistTreeDataProvider } from './changelistTreeDataProvider'
+import type { ChangelistEntry, ChangelistFileEntry, TreeEntry } from './entry'
+
+const catchError = (error: unknown) =>
+  logger.appendLine(error instanceof Error ? error.message : String(error))
 
 export class GitChangelistsManager {
-  private readonly changelistsTree: TreeView<ChangelistEntry>
-  protected readonly treeDataProvider
+  private readonly changelistsTree: TreeView<TreeEntry>
+  protected readonly treeDataProvider: ChangelistTreeDataProvider
   protected readonly git = new GitAPI()
 
   constructor(private readonly context: ExtensionContext) {
+    this.registerViewCommands()
+
+    this.treeDataProvider = new ChangelistTreeDataProvider(this.git.getData())
+
+    this.changelistsTree = window.createTreeView(`${CONFIG.extensionId}.views.explorer`, {
+      treeDataProvider: this.treeDataProvider,
+      showCollapseAll: true,
+      canSelectMany: true,
+    })
+    context.subscriptions.push(this.changelistsTree)
+
+    this.git.sync(this.treeDataProvider.getChangelists())
+  }
+
+  private registerViewCommands() {
     this.context.subscriptions.push(
       commands.registerCommand(`${CONFIG.extensionId}.views.explorer.createNew`, () => {
-        this.createChangelist().catch((error) =>
-          logger.appendLine(error instanceof Error ? error.message : String(error)),
-        )
+        this.createChangelist().catch(catchError)
       }),
+    )
+    this.context.subscriptions.push(
+      commands.registerCommand(
+        `${CONFIG.extensionId}.views.explorer.rename`,
+        (changelist: ChangelistEntry) => this.renameChangelist(changelist).catch(catchError),
+      ),
     )
     this.context.subscriptions.push(
       commands.registerCommand(`${CONFIG.extensionId}.views.explorer.refresh`, () => {
@@ -37,20 +60,39 @@ export class GitChangelistsManager {
     this.context.subscriptions.push(
       commands.registerCommand(
         `${CONFIG.extensionId}.views.explorer.addFileToChangelist`,
-        (node?: { resourceUri: { fsPath: string } }) => {
-          logger.appendLine('addFileToChangelist invoked ' + node?.resourceUri?.fsPath) //TODO: remove
+        (node?: { resourceUri: Uri }) => {
+          if (!node) {
+            return
+          }
+          this.addFileToChangelist(node.resourceUri)
         },
       ),
     )
+    this.context.subscriptions.push(
+      commands.registerCommand(
+        `${CONFIG.extensionId}.views.explorer.removeFile`,
+        (fileEntry?: ChangelistFileEntry) => {
+          if (!fileEntry) {
+            return
+          }
+          this.removeFileFromChangelist(fileEntry)
+        },
+      ),
+    )
+  }
 
-    this.treeDataProvider = new ChangelistTreeDataProvider(this.git.getData())
+  private parseChangelistName(name?: string) {
+    if (!name) {
+      window.showErrorMessage('Changelist name is required!')
+      return null
+    }
 
-    this.changelistsTree = window.createTreeView(`${CONFIG.extensionId}.views.explorer`, {
-      treeDataProvider: this.treeDataProvider,
-      showCollapseAll: true,
-      canSelectMany: true,
-    })
-    context.subscriptions.push(this.changelistsTree)
+    const changelists = this.treeDataProvider.getChildren()
+    if (changelists.some((changelist) => changelist.label === name)) {
+      window.showErrorMessage('Changelist with this name already exists!')
+      return null
+    }
+    return name
   }
 
   @withGitUpdate
@@ -61,23 +103,74 @@ export class GitChangelistsManager {
       value: '',
     })
 
-    if (!newChangelistName) {
-      window.showErrorMessage('Changelist name is required!')
+    const parsedName = this.parseChangelistName(newChangelistName)
+    if (!parsedName) {
       return
     }
 
-    const changelists = this.treeDataProvider.getChildren()
-    if (changelists.some((changelist) => changelist.label === newChangelistName)) {
-      window.showErrorMessage('Changelist with this name already exists!')
+    this.treeDataProvider.addChangelist(parsedName)
+  }
+
+  @withGitUpdate
+  private async renameChangelist(changelist: ChangelistEntry) {
+    const newName = await window.showInputBox({
+      placeHolder: 'Name',
+      prompt: 'Enter unique changelist name',
+      value: changelist.label,
+      ignoreFocusOut: true,
+    })
+
+    const parsedName = this.parseChangelistName(newName)
+    if (!parsedName) {
       return
     }
 
-    this.treeDataProvider.addChangelist(newChangelistName)
+    this.treeDataProvider.renameChangelist(changelist, parsedName)
   }
 
   @withGitUpdate
   private removeChangelist(name: string) {
-    this.treeDataProvider.removeChangelist(name)
+    const files = this.treeDataProvider.removeChangelist(name)
+    files.forEach((file) => this.git.changeAssumeUnchangedStatus(file.fileUri.fsPath, false))
+  }
+
+  @withGitUpdate
+  private async addFileToChangelist(fileUri: Uri) {
+    const changelistName = await this.selectChangelistName()
+    if (!changelistName) {
+      return
+    }
+
+    this.treeDataProvider.addFileToChangelist(changelistName, fileUri)
+    this.git.changeAssumeUnchangedStatus(fileUri.fsPath, true)
+  }
+
+  @withGitUpdate
+  private removeFileFromChangelist(fileEntry: ChangelistFileEntry) {
+    this.treeDataProvider.removeFileFromChangelist(fileEntry)
+    this.git.changeAssumeUnchangedStatus(fileEntry.fileUri.fsPath, false)
+  }
+
+  private async selectChangelistName() {
+    const changelists = this.treeDataProvider.getChangelists()
+    if (!changelists.length) {
+      window.showErrorMessage('No changelists found!')
+      return null
+    }
+
+    if (changelists.length === 1) {
+      return changelists[0].label
+    }
+
+    const changelistName = await window.showQuickPick(
+      changelists.map((changelist) => changelist.label),
+      {
+        placeHolder: 'Select changelist',
+        canPickMany: false,
+      },
+    )
+
+    return changelistName
   }
 }
 
@@ -86,7 +179,7 @@ function withGitUpdate(_target: unknown, _propertyKey: string, descriptor: Prope
 
   descriptor.value = async function (this: GitChangelistsManager, ...args: unknown[]) {
     const returnValue = await originalMethod.apply(this, args)
-    this.git.update(this.treeDataProvider.getChildren())
+    this.git.update(this.treeDataProvider.getChangelists())
     return returnValue
   }
 
