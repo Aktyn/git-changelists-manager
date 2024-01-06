@@ -34,27 +34,32 @@
       },
       {
         "command": "git-changelists-manager.views.explorer.createNew",
-        "title": "Add changelist",
+        "title": "Add Changelist",
         "icon": "$(add)"
       },
       {
         "command": "git-changelists-manager.views.explorer.rename",
-        "title": "Rename changelist",
+        "title": "Rename Changelist",
         "icon": "$(edit)"
       },
       {
         "command": "git-changelists-manager.views.explorer.removeChangeList",
-        "title": "Delete changelist",
+        "title": "Delete Changelist",
         "icon": "$(terminal-kill)"
       },
       {
         "command": "git-changelists-manager.views.explorer.addFileToChangelist",
-        "title": "Add to changelist",
+        "title": "Add to Changelist",
+        "group": "inline"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.addChangesToChangelist",
+        "title": "Add Changes to Changelist",
         "group": "inline"
       },
       {
         "command": "git-changelists-manager.views.explorer.removeFile",
-        "title": "Remove file from changelist",
+        "title": "Remove File from Changelist",
         "icon": "$(terminal-kill)"
       }
     ],
@@ -69,6 +74,50 @@
       ]
     },
     "menus": {
+      "commandPalette": [
+        {
+          "command": "git-changelists-manager.views.explorer.refresh",
+          "title": "Refresh",
+          "icon": "$(refresh)",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.createNew",
+          "title": "Add Changelist",
+          "icon": "$(add)",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.rename",
+          "title": "Rename Changelist",
+          "icon": "$(edit)",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.removeChangeList",
+          "title": "Delete Changelist",
+          "icon": "$(terminal-kill)",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.addFileToChangelist",
+          "title": "Add to Changelist",
+          "group": "inline",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.addChangesToChangelist",
+          "title": "Add Changes to Changelist",
+          "group": "inline",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.removeFile",
+          "title": "Remove File from Changelist",
+          "icon": "$(terminal-kill)",
+          "when": "false"
+        }
+      ],
       "view/title": [
         {
           "command": "git-changelists-manager.views.explorer.createNew",
@@ -96,6 +145,12 @@
           "command": "git-changelists-manager.views.explorer.removeFile",
           "when": "view == git-changelists-manager.views.explorer && viewItem == filePath",
           "group": "inline"
+        }
+      ],
+      "scm/resourceGroup/context": [
+        {
+          "command": "git-changelists-manager.views.explorer.addChangesToChangelist",
+          "when": "scmProvider == git && scmResourceGroup == workingTree"
         }
       ],
       "scm/resourceState/context": [

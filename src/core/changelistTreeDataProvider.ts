@@ -105,14 +105,16 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
     )
   }
 
-  public addFileToChangelist(changelistName: string, fileUri: Uri) {
+  public addFileToChangelist(changelistName: string, fileUris: Uri[]) {
     const changelist = this.changelists.find((changelist) => changelist.label === changelistName)
     if (!changelist) {
       return
     }
 
-    const fileName = getPathRelativeToWorkspace(fileUri.fsPath)
-    changelist.items.push(new ChangelistFileEntry(fileName, fileUri, changelist))
+    for (const fileUri of fileUris) {
+      const fileName = getPathRelativeToWorkspace(fileUri.fsPath)
+      changelist.items.push(new ChangelistFileEntry(fileName, fileUri, changelist))
+    }
 
     this.refresh()
   }

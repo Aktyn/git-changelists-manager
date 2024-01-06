@@ -59,12 +59,24 @@ export class GitChangelistsManager {
     )
     this.context.subscriptions.push(
       commands.registerCommand(
-        `${CONFIG.extensionId}.views.explorer.addFileToChangelist`,
-        (node?: { resourceUri: Uri }) => {
-          if (!node) {
+        `${CONFIG.extensionId}.views.explorer.addChangesToChangelist`,
+        (node: { resourceStates: Array<{ resourceUri: Uri }> }) => {
+          const resourceStates = node?.resourceStates || []
+          if (!(resourceStates?.length > 0)) {
             return
           }
-          this.addFileToChangelist(node.resourceUri)
+          this.addFileToChangelist(resourceStates?.map((r) => r.resourceUri))
+        },
+      ),
+    )
+    this.context.subscriptions.push(
+      commands.registerCommand(
+        `${CONFIG.extensionId}.views.explorer.addFileToChangelist`,
+        (...nodes: Array<{ resourceUri: Uri }>) => {
+          if (!(nodes?.length > 0)) {
+            return
+          }
+          this.addFileToChangelist(nodes?.map((node) => node.resourceUri))
         },
       ),
     )
@@ -135,14 +147,17 @@ export class GitChangelistsManager {
   }
 
   @withGitUpdate
-  private async addFileToChangelist(fileUri: Uri) {
+  private async addFileToChangelist(fileUris: Uri[]) {
     const changelistName = await this.selectChangelistName()
     if (!changelistName) {
       return
     }
 
-    this.treeDataProvider.addFileToChangelist(changelistName, fileUri)
-    this.git.changeAssumeUnchangedStatus(fileUri.fsPath, true)
+    this.treeDataProvider.addFileToChangelist(changelistName, fileUris)
+    this.git.changeAssumeUnchangedStatus(
+      fileUris.map((fileUri) => fileUri.fsPath),
+      true,
+    )
   }
 
   @withGitUpdate
@@ -154,8 +169,9 @@ export class GitChangelistsManager {
   private async selectChangelistName() {
     const changelists = this.treeDataProvider.getChangelists()
     if (!changelists.length) {
-      window.showErrorMessage('No changelists found!')
-      return null
+      const newChangelistName = 'Unnamed Changelist'
+      this.treeDataProvider.addChangelist(newChangelistName)
+      return newChangelistName
     }
 
     if (changelists.length === 1) {

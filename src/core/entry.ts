@@ -26,6 +26,7 @@ export class ChangelistFileEntry extends TreeItem {
     public readonly changelist: ChangelistEntry,
   ) {
     super(label, TreeItemCollapsibleState.None)
+    this.resourceUri = fileUri
   }
 
   public toData(): Required<DataSchema>['files'][number] {
