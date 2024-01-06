@@ -6,8 +6,7 @@ import {
   type TreeDataProvider,
   type TreeItem,
 } from 'vscode'
-import type { DataSchema } from '../common'
-import { getPathRelativeToWorkspace } from '../common'
+import { getPathRelativeToWorkspace, list2Map, type DataSchema } from '../common'
 import { logger } from '../logger'
 import { ChangelistEntry, ChangelistFileEntry, type TreeEntry } from './entry'
 
@@ -71,15 +70,16 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
     )
   }
 
-  public removeChangelist(name: string) {
+  public removeChangelist(name: string, ifDelete = true) {
     const changelist = this.changelists.find((changelist) => changelist.label === name)
 
-    this.changelists = this.changelists.filter((changelist) => changelist.label !== name)
-    this.refresh()
-
-    logger.appendLine(
-      `Changelist "${name}" removed!\nTotal changelists: ${this.changelists.length}`,
-    )
+    if (ifDelete) {
+      this.changelists = this.changelists.filter((changelist) => changelist.label !== name)
+      this.refresh()
+      logger.appendLine(
+        `Changelist "${name}" removed!\nTotal changelists: ${this.changelists.length}`,
+      )
+    }
 
     return changelist?.items ?? []
   }
@@ -105,32 +105,33 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
     )
   }
 
-  public addFileToChangelist(changelistName: string, fileUri: Uri) {
+  public addFileToChangelist(changelistName: string, fileUris: Uri[]) {
     const changelist = this.changelists.find((changelist) => changelist.label === changelistName)
     if (!changelist) {
       return
     }
 
-    const fileName = getPathRelativeToWorkspace(fileUri.fsPath)
-    changelist.items.push(new ChangelistFileEntry(fileName, fileUri, changelist))
+    for (const fileUri of fileUris) {
+      const fileName = getPathRelativeToWorkspace(fileUri.fsPath)
+      changelist.items.push(new ChangelistFileEntry(fileName, fileUri, changelist))
+    }
 
     this.refresh()
   }
 
-  public removeFileFromChangelist(fileEntry: ChangelistFileEntry) {
-    const changelist =
-      fileEntry.changelist ??
-      this.changelists.find((changelist) =>
-        changelist.items.some((item) => item.fileUri.path === fileEntry.fileUri.path),
-      )
-    if (!changelist) {
-      logger.appendLine(`Changelist not found for file "${fileEntry.fileUri.toString()}"`)
-      return
-    }
-    const index = changelist.items.indexOf(fileEntry)
-    if (index !== -1) {
-      changelist.items.splice(index, 1)
-    }
+  public removeFilesFromChangelist(fileEntries: ChangelistFileEntry[]) {
+    const deleteFileEntryMap = list2Map(fileEntries, (item) => item.fileUri.path)
+
+    this.changelists.forEach((changelist) => {
+      let i = 0
+      while (i < changelist.items.length) {
+        if (deleteFileEntryMap[changelist.items[i].fileUri.path]) {
+          changelist.items.splice(i, 1)
+          continue
+        }
+        i++
+      }
+    })
 
     this.refresh()
   }

@@ -20,3 +20,21 @@ export function getPathRelativeToWorkspace(filePath: string) {
 export function forceArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value]
 }
+
+type IdentifierCallback<T> = (item: T) => string
+export function list2Map<T extends object>(
+  list: T[],
+  identifier: T extends Record<string, unknown>
+    ? string | IdentifierCallback<T>
+    : IdentifierCallback<T>,
+) {
+  const map: Record<string, T> = {}
+  list.forEach((item) => {
+    if (identifier instanceof Function) {
+      map[identifier(item)] = item
+      return
+    }
+    map[item[identifier]] = item
+  })
+  return map
+}
