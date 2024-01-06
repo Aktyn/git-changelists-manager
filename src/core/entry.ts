@@ -14,6 +14,8 @@ export class ChangelistEntry extends TreeItem {
       files: this.items?.map((item) => item.toData()) ?? [],
     }
   }
+
+  static [Symbol.species]: ChangelistEntry
 }
 
 export class ChangelistFileEntry extends TreeItem {
@@ -32,6 +34,8 @@ export class ChangelistFileEntry extends TreeItem {
   public toData(): Required<DataSchema>['files'][number] {
     return { name: this.label, uri: this.fileUri.toString() }
   }
+
+  static [Symbol.species]: ChangelistFileEntry
 }
 
 export type TreeEntry = ChangelistEntry | ChangelistFileEntry

@@ -71,15 +71,16 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
     )
   }
 
-  public removeChangelist(name: string) {
+  public removeChangelist(name: string, ifDelete = true) {
     const changelist = this.changelists.find((changelist) => changelist.label === name)
 
-    this.changelists = this.changelists.filter((changelist) => changelist.label !== name)
-    this.refresh()
-
-    logger.appendLine(
-      `Changelist "${name}" removed!\nTotal changelists: ${this.changelists.length}`,
-    )
+    if (ifDelete) {
+      this.changelists = this.changelists.filter((changelist) => changelist.label !== name)
+      this.refresh()
+      logger.appendLine(
+        `Changelist "${name}" removed!\nTotal changelists: ${this.changelists.length}`,
+      )
+    }
 
     return changelist?.items ?? []
   }
@@ -119,20 +120,34 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
     this.refresh()
   }
 
-  public removeFileFromChangelist(fileEntry: ChangelistFileEntry) {
-    const changelist =
-      fileEntry.changelist ??
-      this.changelists.find((changelist) =>
-        changelist.items.some((item) => item.fileUri.path === fileEntry.fileUri.path),
-      )
-    if (!changelist) {
-      logger.appendLine(`Changelist not found for file "${fileEntry.fileUri.toString()}"`)
-      return
+  public removeFilesFromChangelist(fileEntries: ChangelistFileEntry[]) {
+    const list2Map = <T extends Record<string, any>>(
+      list: T[],
+      identifier: string | ((item: T) => string),
+    ): Record<string, T> => {
+      const map: Record<string, T> = {}
+      list.forEach((item) => {
+        if (identifier instanceof Function) {
+          map[identifier(item)] = item
+          return
+        }
+        map[item[identifier] as string] = item
+      })
+      return map
     }
-    const index = changelist.items.indexOf(fileEntry)
-    if (index !== -1) {
-      changelist.items.splice(index, 1)
-    }
+
+    const deleteFileEntryMap = list2Map(fileEntries, (item) => item.fileUri.path)
+
+    this.changelists.forEach((changelist) => {
+      let i = 0
+      while (i < changelist.items.length) {
+        if (deleteFileEntryMap[changelist.items[i].fileUri.path]) {
+          changelist.items.splice(i, 1)
+          continue
+        }
+        i++
+      }
+    })
 
     this.refresh()
   }

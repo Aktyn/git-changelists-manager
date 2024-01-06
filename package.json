@@ -44,8 +44,13 @@
       },
       {
         "command": "git-changelists-manager.views.explorer.removeChangeList",
-        "title": "Delete Changelist",
+        "title": "Remove Changelist and Restore",
         "icon": "$(terminal-kill)"
+      },
+      {
+        "command": "git-changelists-manager.views.explorer.restoreChangeList",
+        "title": "Restore Changelist",
+        "icon": "$(settings-discard)"
       },
       {
         "command": "git-changelists-manager.views.explorer.addFileToChangelist",
@@ -95,8 +100,14 @@
         },
         {
           "command": "git-changelists-manager.views.explorer.removeChangeList",
-          "title": "Delete Changelist",
+          "title": "Remove Changelist and Restore",
           "icon": "$(terminal-kill)",
+          "when": "false"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.restoreChangeList",
+          "title": "Restore Changelist",
+          "icon": "$(settings-discard)",
           "when": "false"
         },
         {
@@ -132,19 +143,38 @@
       ],
       "view/item/context": [
         {
+          "command": "git-changelists-manager.views.explorer.restoreChangeList",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
+          "group": "inline@1"
+        },
+        {
           "command": "git-changelists-manager.views.explorer.rename",
           "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
-          "group": "inline"
+          "group": "inline@2"
         },
         {
           "command": "git-changelists-manager.views.explorer.removeChangeList",
           "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
-          "group": "inline"
+          "group": "inline@3"
         },
         {
           "command": "git-changelists-manager.views.explorer.removeFile",
           "when": "view == git-changelists-manager.views.explorer && viewItem == filePath",
           "group": "inline"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.restoreChangeList",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
+          "group": "@1"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.removeChangeList",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == changelist",
+          "group": "@2"
+        },
+        {
+          "command": "git-changelists-manager.views.explorer.removeFile",
+          "when": "view == git-changelists-manager.views.explorer && viewItem == filePath"
         }
       ],
       "scm/resourceGroup/context": [
