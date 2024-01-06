@@ -6,8 +6,7 @@ import {
   type TreeDataProvider,
   type TreeItem,
 } from 'vscode'
-import type { DataSchema } from '../common'
-import { getPathRelativeToWorkspace } from '../common'
+import { getPathRelativeToWorkspace, list2Map, type DataSchema } from '../common'
 import { logger } from '../logger'
 import { ChangelistEntry, ChangelistFileEntry, type TreeEntry } from './entry'
 
@@ -121,21 +120,6 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
   }
 
   public removeFilesFromChangelist(fileEntries: ChangelistFileEntry[]) {
-    const list2Map = <T extends Record<string, any>>(
-      list: T[],
-      identifier: string | ((item: T) => string),
-    ): Record<string, T> => {
-      const map: Record<string, T> = {}
-      list.forEach((item) => {
-        if (identifier instanceof Function) {
-          map[identifier(item)] = item
-          return
-        }
-        map[item[identifier] as string] = item
-      })
-      return map
-    }
-
     const deleteFileEntryMap = list2Map(fileEntries, (item) => item.fileUri.path)
 
     this.changelists.forEach((changelist) => {

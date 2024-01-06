@@ -87,7 +87,7 @@ export class GitChangelistsManager {
           if (!(nodes?.length > 0)) {
             return
           }
-          this.addFileToChangelist(nodes?.map((node) => node.resourceUri))
+          this.addFileToChangelist(nodes.map((node) => node.resourceUri))
         },
       ),
     )
