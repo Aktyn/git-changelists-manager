@@ -3,7 +3,6 @@ import * as Mocha from 'mocha'
 import { glob } from 'glob'
 
 export async function run(): Promise<void> {
-  // Create the mocha test
   const mocha = new Mocha({
     ui: 'tdd',
     color: true,
@@ -12,16 +11,13 @@ export async function run(): Promise<void> {
   const testsRoot = path.resolve(__dirname, '..')
 
   try {
-    // Use the new glob syntax
     const files = await glob('**/**.test.js', {
       cwd: testsRoot,
       ignore: 'node_modules/**',
     })
 
-    // Add files to the test suite
     files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)))
 
-    // Run the mocha test
     return new Promise((resolve, reject) => {
       mocha.run((failures) => {
         if (failures > 0) {

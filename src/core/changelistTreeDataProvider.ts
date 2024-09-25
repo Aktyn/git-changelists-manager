@@ -113,7 +113,16 @@ export class ChangelistTreeDataProvider implements TreeDataProvider<TreeEntry> {
 
     for (const fileUri of fileUris) {
       const fileName = getPathRelativeToWorkspace(fileUri.fsPath)
-      changelist.items.push(new ChangelistFileEntry(fileName, fileUri, changelist))
+      const isFileAlreadyListed = this.changelists.some((changelist) =>
+        changelist.items.some((item) => item.fileUri.fsPath === fileUri.fsPath),
+      )
+      if (!isFileAlreadyListed) {
+        changelist.items.push(new ChangelistFileEntry(fileName, fileUri, changelist))
+      } else {
+        logger.appendLine(
+          `File "${fileName}" is already listed in changelist "${changelist.label}"`,
+        )
+      }
     }
 
     this.refresh()

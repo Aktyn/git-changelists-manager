@@ -94,9 +94,24 @@ export class GitAPI {
     logger.appendLine(`Exclude file updated`)
   }
 
+  private isFileTracked(filePath: string) {
+    try {
+      execSync(`git ls-files ${filePath} | grep .`, this.execOptions)
+      return true
+    } catch (error) {
+      logger.appendLine(error instanceof Error ? error.message : String(error))
+      logger.appendLine(`File "${filePath}" is not tracked by git`)
+      return false
+    }
+  }
+
   public changeAssumeUnchangedStatus(filePaths: string | string[], assumeUnchanged: boolean) {
     try {
       for (const filePath of forceArray(filePaths)) {
+        if (!this.isFileTracked(filePath)) {
+          continue
+        }
+
         const relativePath = getPathRelativeToWorkspace(filePath)
         execSync(
           `git update-index --${
