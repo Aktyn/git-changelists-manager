@@ -4,7 +4,10 @@ import type { DataSchema } from '../common'
 export class ChangelistEntry extends TreeItem {
   public readonly contextValue = 'changelist'
 
-  constructor(public readonly label: string, public readonly items: ChangelistFileEntry[]) {
+  constructor(
+    public readonly label: string,
+    public readonly items: ChangelistFileEntry[],
+  ) {
     super(label, TreeItemCollapsibleState.Expanded)
   }
 

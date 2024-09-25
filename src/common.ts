@@ -22,12 +22,7 @@ export function forceArray<T>(value: T | T[]): T[] {
 }
 
 type IdentifierCallback<T> = (item: T) => string
-export function list2Map<T extends object>(
-  list: T[],
-  identifier: T extends Record<string, unknown>
-    ? string | IdentifierCallback<T>
-    : IdentifierCallback<T>,
-) {
+export function list2Map<T extends object>(list: T[], identifier: IdentifierCallback<T>) {
   const map: Record<string, T> = {}
   list.forEach((item) => {
     if (identifier instanceof Function) {
