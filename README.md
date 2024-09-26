@@ -20,3 +20,7 @@ It also allows the user to group files into changelists so that they can be rest
 - New options in the right-click context menu
 - Show file icon in changelist view
 - Removed all extension commands from the command palette (they didn't do anything)
+
+### 1.0.3
+- Fixed issue with files already listed in changelist
+- Adding untracked files to changelist will no longer show error message
